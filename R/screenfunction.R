@@ -13,7 +13,7 @@ screenLastz <- function(reference,querry)
   try(unlink("temp", recursive = TRUE))
   dir.create('temp',showWarnings = F)
   myarg <- paste0(reference,' ',querry,' --ambiguous=iupac --notransition --step=100 --nogapped ‑‑format=rdotplot > temp/result.maf')
-  system2(command='/home/jerome/Documents/0-installation-files/lastz/src/lastz',args=myarg)
+  system2(command='lastz',args=myarg)
 
   last <- try(read.table("temp/result.maf"), silent = T)
   if (class(last) == "data.frame")
