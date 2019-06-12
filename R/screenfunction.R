@@ -32,4 +32,5 @@ screenLastz <- function(reference,querry)
   else (percentage <- 0)
   unlink('temp',recursive = T)
   return(percentage)
+
 }
