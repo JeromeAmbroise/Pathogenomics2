@@ -26,6 +26,7 @@ screenLastz <- function(reference,querry)
 
     hitlength <- sum(width(GR.disjoin))
     seqlength <- width(readDNAStringSet(reference))
+
     percentage <- 100*round(hitlength/seqlength,3)
   }
   else (percentage <- 0)
