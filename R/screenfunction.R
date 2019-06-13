@@ -6,13 +6,14 @@
 #' @param querry the querry sequence
 #'
 #' @return numeric value of the percentage of the reference sequence which is covered by the querry
+#' @import GenomicRanges IRanges Biostrings
 #'
 #' @export
 screenLastz <- function(reference,querry)
 {
   try(unlink("temp", recursive = TRUE))
   dir.create('temp',showWarnings = F)
-  myarg <- paste0(reference,' ',querry,' --ambiguous=iupac --notransition --step=100 --nogapped ‑‑format=rdotplot > temp/result.maf')
+  myarg <- paste0(reference,'[multiple] ',querry,' --ambiguous=iupac --notransition --step=100 --nogapped ‑‑format=rdotplot > temp/result.maf')
   system2(command='lastz',args=myarg)
 
   last <- try(read.table("temp/result.maf"), silent = T)
@@ -25,7 +26,7 @@ screenLastz <- function(reference,querry)
     GR.disjoin <- disjoin(GR)
 
     hitlength <- sum(width(GR.disjoin))
-    seqlength <- width(readDNAStringSet(reference))
+    seqlength <- sum(width(readDNAStringSet(reference)))
 
     percentage <- 100*round(hitlength/seqlength,3)
   }
@@ -40,13 +41,14 @@ screenLastz <- function(reference,querry)
 #'
 #' You provide a reference and a querry and the function compute the percentage of the reference which is covered by the querry
 #'
-#' @param reference the reference sequence that you want to screen
-#' @param querry the querry sequence
+#' @param reference the reference sequence that you want to screen. Fasta file in one or severa sequences
+#' @param querry the querry sequence. Fasta file in one or severa sequences
 #'
 #' @return numeric value of the percentage of the reference sequence which is covered by the querry
+#' @import GenomicRanges IRanges Biostrings
 #'
 #' @export
-screenBlast <- function (reference, querry,min.pc.ident)
+screenBlast <-function (reference, querry,min.pc.ident)
 {
   try(unlink("temp", recursive = TRUE))
   dir.create("temp")
@@ -68,10 +70,10 @@ screenBlast <- function (reference, querry,min.pc.ident)
     new.start[start>end] <- end[start>end]
     new.end[start>end] <- start[start>end]
     data.frame(start,end,new.start,new.end)
-    GR <- GRanges(seqnames = 'seq',ranges = IRanges(start =new.start ,end = new.end))
+    GR <- GRanges(seqnames = blast$subject.access,ranges = IRanges(start =new.start ,end = new.end))
     GR.disjoin <- disjoin(GR)
     hitlength <- sum(width(GR.disjoin))
-    seqlength <- width(readDNAStringSet(reference))
+    seqlength <- sum(width(readDNAStringSet(reference)))
     percentage <- 100*round(hitlength/seqlength,3)
   }
   else{percentage <- 0}
