@@ -48,7 +48,7 @@ screenLastz <- function(reference,querry)
 #' @import GenomicRanges IRanges Biostrings
 #'
 #' @export
-screenBlast <-function (reference, querry,min.pc.ident)
+screenBlast <-function (reference, querry,min.pc.ident,coveragetype)
 {
   try(unlink("temp", recursive = TRUE))
   dir.create("temp")
@@ -72,12 +72,36 @@ screenBlast <-function (reference, querry,min.pc.ident)
     data.frame(start,end,new.start,new.end)
     GR <- GRanges(seqnames = blast$subject.access,ranges = IRanges(start =new.start ,end = new.end))
     GR.disjoin <- disjoin(GR)
-    hitlength <- sum(width(GR.disjoin))
-    seqlength <- sum(width(readDNAStringSet(reference)))
-    percentage <- 100*round(hitlength/seqlength,3)
-  }
-  else{percentage <- 0}
-  unlink('temp',recursive = T)
-  return(percentage)
-}
 
+
+    if(coveragetype == 'agregated' )
+    {
+      hitlength <- sum(width(GR.disjoin))
+      seqlength <- sum(width(readDNAStringSet(reference)))
+      cover.percentage <- 100*round(hitlength/seqlength,3)
+      result <- cover.percentage
+    }
+
+    if(coveragetype == 'separated' )
+    {
+      reference.sequence <- readDNAStringSet(reference)
+      N.contigs <- length(reference.sequence)
+      seqlength <- numeric()
+      cover.percentage <- numeric()
+      for(i in 1:N.contigs)
+      {
+        seqlength <- width(reference.sequence[i])
+        GR.disjoin.selected <- GR.disjoin[as.character(seqnames(GR.disjoin))==names(reference.sequence[i])]
+        hitlength <- sum(width(GR.disjoin.selected))
+        cover.percentage[i] <- 100*round(hitlength/seqlength,3)
+      }
+      reference.name <- names(reference.sequence)
+      result <- data.frame(reference.name,cover.percentage)
+    }
+
+
+  }
+  else{result <- 0}
+  unlink('temp',recursive = T)
+  return(result)
+}
